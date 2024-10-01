@@ -8,6 +8,8 @@
 import SwiftUI
 import MapKit
 import CoreLocation
+import UIKit
+import PhotosUI
 
 extension CLLocationCoordinate2D: Equatable {
     static public func ==(lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
@@ -24,30 +26,29 @@ struct FootballPost: Identifiable, Codable {
     let goals: Int
     let assists: Int
     let highlights: String
-    let improvements: String
-    let locationName: String
-    let latitude: Double // Propriété pour la latitude
-    let longitude: Double // Propriété pour la longitude
-
-    // Calculer les coordonnées à partir de latitude et longitude
+    let latitude: Double
+    let longitude: Double
+    
+    // Propriétés pour les photos/vidéos
+    let mediaData: Data? // Pour stocker une photo ou une vidéo
+    
     var locationCoordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
-    // Initialisateur pour faciliter la création d'un post à partir de CLLocationCoordinate2D
-    init(date: Date, opponent: String, score: String, goals: Int, assists: Int, highlights: String, improvements: String, locationName: String, locationCoordinate: CLLocationCoordinate2D) {
+    init(date: Date, opponent: String, score: String, goals: Int, assists: Int, highlights: String, locationCoordinate: CLLocationCoordinate2D, mediaData: Data?) {
         self.date = date
         self.opponent = opponent
         self.score = score
         self.goals = goals
         self.assists = assists
         self.highlights = highlights
-        self.improvements = improvements
-        self.locationName = locationName
         self.latitude = locationCoordinate.latitude
         self.longitude = locationCoordinate.longitude
+        self.mediaData = mediaData
     }
 }
+
 
 // Wrapper pour CLLocationCoordinate2D
 struct EquatableCoordinate: Equatable {
@@ -64,17 +65,9 @@ struct EquatableCoordinate: Equatable {
 struct ContentView: View {
     var body: some View {
         TabView {
-            FeedView()
+            MatchView()
                 .tabItem {
-                    Label("Feed", systemImage: "house.fill")
-                }
-            CreatePostView()
-                .tabItem {
-                    Label("Create", systemImage: "plus.circle.fill")
-                }
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle.fill")
+                    Label("Matchs", systemImage: "house.fill")
                 }
         }
         .accentColor(Color.orange) // Accentuation en orange pour les éléments interactifs
@@ -119,8 +112,9 @@ class PostStorage: ObservableObject {
 }
 
 // Vue pour le fil d'actualité (Feed)
-struct FeedView: View {
+struct MatchView: View {
     @ObservedObject var postStorage = PostStorage()
+    @State private var isCreatePostPresented = false // État pour contrôler la présentation de CreatePostView
 
     var body: some View {
         NavigationView {
@@ -135,18 +129,13 @@ struct FeedView: View {
                                     Text(post.opponent)
                                         .font(.headline)
                                         .fontWeight(.bold)
-                                        .foregroundColor(.white) // Texte en blanc pour contraste
                                     Spacer()
                                     Text(post.score)
                                         .font(.subheadline)
                                         .foregroundColor(.gray) // Texte gris
                                 }
-                                Text("Location: \(post.locationName)")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
                                 Text("Date: \(post.date, formatter: dateFormatter)")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
                             }
                             .padding()
                             .background(Color.gray.opacity(0.2)) // Fond gris clair pour les cellules
@@ -157,11 +146,31 @@ struct FeedView: View {
                 }
                 .listStyle(PlainListStyle()) // Empêche l'utilisation du fond blanc par défaut des sections
                 .background(Color.clear) // S'assure que la liste soit transparente
-                .navigationTitle("Match History") // Nouveau titre pour le Feed
+                .navigationTitle("Matchs") // Nouveau titre pour le Feed
                 .toolbar {
                     EditButton() // Bouton d'édition pour supprimer les posts
                 }
             }
+            .overlay(
+                // Ajouter un bouton en bas à droite pour créer un nouveau post
+                Button(action: {
+                    isCreatePostPresented.toggle() // Afficher CreatePostView
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.orange)
+                        .clipShape(Circle())
+                        .shadow(radius: 10)
+                }
+                .padding(.bottom, 30) // Espacement du bas
+                .padding(.trailing, 20), // Espacement à droite
+                alignment: .bottomTrailing // Positionner le bouton en bas à droite
+            )
+        }
+        .sheet(isPresented: $isCreatePostPresented) {
+            CreatePostView() // Présenter CreatePostView dans une feuille
         }
         .edgesIgnoringSafeArea(.all) // Ignore les bords pour que le fond dégradé prenne toute la vue
     }
@@ -175,9 +184,10 @@ struct PostDetailView: View {
     var body: some View {
         ZStack {
             DarkBlueGradientBackground()
-            ScrollView {
+            ScrollView { // Un seul ScrollView
                 VStack(alignment: .leading, spacing: 15) {
-                    Text("Opponent: \(post.opponent)")
+                    Spacer()
+                    Text("Adversaire:  \(post.opponent)")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
@@ -188,40 +198,50 @@ struct PostDetailView: View {
                     
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Goals: \(post.goals)")
-                            Text("Assists: \(post.assists)")
+                            Text("Buts: \(post.goals)")
+                            Text("Passes dés: \(post.assists)")
                         }
                         .foregroundColor(.white)
                         Spacer()
                     }
                     .font(.subheadline)
                     
-                    MapView(coordinate: post.locationCoordinate)
-                        .frame(height: 200)
-                        .cornerRadius(10)
-                        .padding(.vertical)
-
-                    Text("Highlights:")
+                    // Vérifiez et affichez l'image si disponible
+                    if let mediaData = post.mediaData, let image = UIImage(data: mediaData) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 200)
+                            .cornerRadius(10)
+                            .padding(.bottom) // Ajoutez du padding pour éviter la superposition
+                    } else {
+                        Text("No media available")
+                            .foregroundColor(.gray)
+                    }
+                    
+                    Text("Description:")
                         .font(.headline)
                         .foregroundColor(.white)
                     Text(post.highlights)
                         .foregroundColor(.gray)
                     
-                    Text("Improvements:")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text(post.improvements)
-                        .foregroundColor(.gray)
-                    
-                    Spacer()
+                    Spacer() // Ajoutez un Spacer pour donner de l'espace à la carte
+
+                    MapView(coordinate: post.locationCoordinate)
+                        .frame(height: 200)
+                        .cornerRadius(10)
+                        .padding(.vertical)
                 }
                 .padding()
-                .navigationTitle("Match Details")
+                .padding(.top, 70)
             }
         }
         .edgesIgnoringSafeArea(.all)
+        .navigationTitle("Détails du match") // Assurez-vous que le titre est défini
+        .navigationBarTitleDisplayMode(.inline) // Affichez le titre en mode inline
     }
 }
+
 
 // Vue pour créer un nouveau post
 struct CreatePostView: View {
@@ -230,8 +250,6 @@ struct CreatePostView: View {
     @State private var goals = ""
     @State private var assists = ""
     @State private var highlights = ""
-    @State private var improvements = ""
-    @State private var locationName = ""
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 48.8566, longitude: 2.3522),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -240,6 +258,10 @@ struct CreatePostView: View {
     @ObservedObject var postStorage = PostStorage()
     @State private var showAlert = false
 
+    // For image picker
+    @State private var selectedImage: UIImage? = nil
+    @State private var isImagePickerPresented = false
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -247,27 +269,43 @@ struct CreatePostView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        Text("Create New Post")
+                        Text("Créer un nouveau match")
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white) // Texte en blanc pour le contraste
                             .padding(.top)
 
-                        FormField(label: "Opponent", text: $opponent)
-                        FormField(label: "Score (e.g., 3-2)", text: $score)
-                        FormField(label: "Goals", text: $goals)
-                        FormField(label: "Assists", text: $assists)
+                        FormField(label: "Adversaire", text: $opponent)
+                        FormField(label: "Score", text: $score)
+                        FormField(label: "Buts", text: $goals)
+                        FormField(label: "Passes dé", text: $assists)
 
-                        FormField(label: "Highlights", text: $highlights)
-                        FormField(label: "Improvements", text: $improvements)
+                        FormField(label: "Description", text: $highlights)
 
-                        TextField("Location Name", text: $locationName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .foregroundColor(.white) // Couleur du texte dans le champ
-                            .background(Color.gray.opacity(0.2)) // Fond du champ de texte légèrement gris clair
-                            .padding(.horizontal)
+                        // Image picker section
+                        if let image = selectedImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .padding(.top)
+                        }
 
-                        Text("Select Match Location:")
+                        Button(action: {
+                            isImagePickerPresented.toggle()
+                        }) {
+                            Text("Photos")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.orange)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+
+                        Text("Lieu du match:")
                             .font(.headline)
                             .foregroundColor(.white) // Texte en blanc
 
@@ -283,7 +321,7 @@ struct CreatePostView: View {
                         }
 
                         Button(action: savePost) {
-                            Text("Save Post")
+                            Text("Enregistrer")
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                                 .padding()
@@ -293,7 +331,7 @@ struct CreatePostView: View {
                         }
                         .padding(.horizontal)
                         .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Error"), message: Text("Please fill in all the fields."), dismissButton: .default(Text("OK")))
+                            Alert(title: Text("Erreur"), message: Text("Please fill in all the fields."), dismissButton: .default(Text("OK")))
                         }
                     }
                     .padding()
@@ -301,15 +339,21 @@ struct CreatePostView: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(.all) // Le fond prendra tout l'écran
+        .sheet(isPresented: $isImagePickerPresented) {
+            ImagePicker(selectedImage: $selectedImage)
+        }
+        .edgesIgnoringSafeArea(.all)
     }
 
     func savePost() {
-        guard !opponent.isEmpty, !score.isEmpty, let goalsInt = Int(goals), let assistsInt = Int(assists), !highlights.isEmpty, !improvements.isEmpty, !locationName.isEmpty else {
+        guard !opponent.isEmpty, !score.isEmpty, let goalsInt = Int(goals), let assistsInt = Int(assists), !highlights.isEmpty else {
             showAlert = true
             return
         }
-        
+
+        // Convert the selected image to Data if available
+        let mediaData = selectedImage?.jpegData(compressionQuality: 0.8) // Adjust compression quality as needed
+
         let newPost = FootballPost(
             date: Date(),
             opponent: opponent,
@@ -317,20 +361,19 @@ struct CreatePostView: View {
             goals: goalsInt,
             assists: assistsInt,
             highlights: highlights,
-            improvements: improvements,
-            locationName: locationName,
-            locationCoordinate: selectedCoordinate.coordinate
+            locationCoordinate: selectedCoordinate.coordinate,
+            mediaData: mediaData // Pass the media data (image) here
         )
+
         postStorage.addPost(newPost)
-        
-        // Réinitialiser les champs après l'ajout du post
+
+        // Reset the fields after saving the post
         opponent = ""
         score = ""
         goals = ""
         assists = ""
         highlights = ""
-        improvements = ""
-        locationName = ""
+        selectedImage = nil // Reset the selected image
     }
 }
 
@@ -368,7 +411,7 @@ struct ProfileView: View {
                     .frame(width: 150, height: 150)
                     .padding()
 
-                Text("Profile")
+                Text("Profil")
                     .font(.title)
                     .foregroundColor(.white) // Texte blanc pour contraste
                     .padding()
@@ -408,7 +451,7 @@ struct ProfileView: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
-        .navigationTitle("Profile")
+        .navigationTitle("Profil")
     }
 }
 
@@ -458,6 +501,46 @@ let dateFormatter: DateFormatter = {
     formatter.dateStyle = .medium
     return formatter
 }()
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.presentationMode) var presentationMode
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = sourceType
+        picker.allowsEditing = false // Set to true if you want to allow image editing
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: ImagePicker
+
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                parent.selectedImage = image
+            }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+    }
+}
+
 
 // Preview pour SwiftUI
 struct ContentView_Previews: PreviewProvider {
