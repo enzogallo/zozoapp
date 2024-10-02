@@ -224,6 +224,7 @@ struct EditPostView: View {
     @State private var highlights: String
     @State private var selectedImage: UIImage? = nil
     @State private var showAlert = false
+    @State private var selectedDate: Date
 
     init(postStorage: PostStorage, post: FootballPost) {
         self.postStorage = postStorage
@@ -235,6 +236,9 @@ struct EditPostView: View {
         _goals = State(initialValue: String(post.goals))
         _assists = State(initialValue: String(post.assists))
         _highlights = State(initialValue: post.highlights)
+        
+        // Initialiser la date avec la date du post existant
+        _selectedDate = State(initialValue: post.date)
     }
 
     var body: some View {
@@ -244,23 +248,32 @@ struct EditPostView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        Text("Modifier le post")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.top)
 
-                        // Modifie la couleur ici pour chaque champ de formulaire
+                        // Champs de formulaire
                         FormField(label: "Adversaire", text: $opponent)
-                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Score", text: $score)
-                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Buts", text: $goals)
-                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Passes dé", text: $assists)
-                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Description", text: $highlights)
-                            .foregroundColor(.black) // Couleur noire
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Date du match")
+                                .font(.headline)
+                                .foregroundColor(.white) // Texte en blanc
+                                
+
+                            // Ajout d'un DatePicker pour modifier la date
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.white)
+                                                        
+                                DatePicker("Date du match", selection: $selectedDate, displayedComponents: .date)
+                                    .datePickerStyle(GraphicalDatePickerStyle())
+                                    .padding()
+                                    .foregroundColor(.white) // Texte du DatePicker
+                            }
+                            .padding(.horizontal)
+                        }
 
                         // Afficher l'image actuelle
                         if let image = selectedImage ?? UIImage(data: post.mediaData ?? Data()) {
@@ -300,7 +313,7 @@ struct EditPostView: View {
                         }
                     }
                     .padding()
-                    .navigationBarTitle("Édition de Post", displayMode: .inline)
+                    .navigationBarTitle("Modifier le match", displayMode: .inline)
                 }
             }
         }
@@ -316,7 +329,7 @@ struct EditPostView: View {
         let mediaData = selectedImage?.jpegData(compressionQuality: 0.8) ?? post.mediaData
 
         let updatedPost = FootballPost(
-            date: post.date,
+            date: selectedDate, // Met à jour la date avec la date sélectionnée
             opponent: opponent,
             score: score,
             goals: goalsInt,
@@ -432,7 +445,7 @@ struct CreatePostView: View {
                         Text("Créer un nouveau match")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding(.top)
 
                         FormField(label: "Adversaire", text: $opponent)
