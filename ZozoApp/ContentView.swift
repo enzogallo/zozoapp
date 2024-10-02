@@ -112,35 +112,60 @@ class PostStorage: ObservableObject {
     }
 }
 
+struct MatchRowView: View {
+    var post: FootballPost
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text(post.opponent)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                Spacer()
+                Text(post.score)
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+            }
+            Text("Date: \(post.date, formatter: dateFormatter)")
+                .font(.caption)
+                .foregroundColor(.white)
+        }
+        .padding()
+        .background(Color.clear)
+        .cornerRadius(10)
+        .listRowBackground(Color.clear) // Rendre le fond de la cellule transparent
+    }
+}
+
+
 // Vue match
 struct MatchView: View {
     @ObservedObject var postStorage = PostStorage()
-    @State private var isCreatePostPresented = false // État pour contrôler la présentation de CreatePostView
+    @State private var isCreatePostPresented = false
+    @State private var selectedPost: FootballPost? = nil
+    @State private var isEditPostPresented = false
 
     var body: some View {
         NavigationView {
             ZStack {
                 DarkBlueGradientBackground()
-                    .edgesIgnoringSafeArea(.all) // S'assurer que le fond couvre tout l'écran
+                    .edgesIgnoringSafeArea(.all)
 
                 List {
                     ForEach(postStorage.posts) { post in
                         NavigationLink(destination: PostDetailView(post: post)) {
-                            VStack(alignment: .leading, spacing: 5) {
+                            MatchRowView(post: post)
+                        }
+                        .contextMenu {
+                            Button(action: {
+                                selectedPost = post
+                                isEditPostPresented = true
+                            }) {
                                 HStack {
-                                    Text(post.opponent)
-                                        .font(.headline)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                    Spacer()
-                                    Text(post.score)
-                                        .font(.subheadline)
-                                        .foregroundColor(.white) // Texte gris
+                                    Image(systemName: "pencil")
+                                    Text("Modifier")
                                 }
-                                Text("Date: \(post.date, formatter: dateFormatter)")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                                
                             }
                             .padding()
                             .background(Color.clear) // S'assurer que le fond de chaque cellule est transparent
@@ -149,19 +174,18 @@ struct MatchView: View {
                         // Appliquer un fond transparent à chaque cellule de la liste
                         .listRowBackground(Color.clear)
                     }
-                    .onDelete(perform: postStorage.removePost) // Permet de supprimer un post
+                    .onDelete(perform: postStorage.removePost)
                 }
-                .background(Color.clear) // S'assurer que le fond de la liste est transparent
-                .listStyle(PlainListStyle()) // Style sans sections
-                .navigationTitle("Matchs") // Titre
+                .background(Color.clear)
+                .listStyle(PlainListStyle())
+                .navigationTitle("Matchs")
                 .toolbar {
-                    EditButton() // Bouton d'édition
+                    EditButton()
                 }
             }
             .overlay(
-                // Bouton pour ajouter un nouveau post
                 Button(action: {
-                    isCreatePostPresented.toggle() // Afficher CreatePostView
+                    isCreatePostPresented.toggle()
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.largeTitle)
@@ -177,9 +201,12 @@ struct MatchView: View {
             )
         }
         .sheet(isPresented: $isCreatePostPresented) {
-            CreatePostView() // Présenter CreatePostView dans une feuille
+            CreatePostView()
         }
-        .edgesIgnoringSafeArea(.all) // Ignore les bords pour que le fond prenne toute la vue
+        .sheet(item: $selectedPost) { post in
+            EditPostView(postStorage: postStorage, post: post)
+        }
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -223,11 +250,17 @@ struct EditPostView: View {
                             .foregroundColor(.white)
                             .padding(.top)
 
+                        // Modifie la couleur ici pour chaque champ de formulaire
                         FormField(label: "Adversaire", text: $opponent)
+                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Score", text: $score)
+                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Buts", text: $goals)
+                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Passes dé", text: $assists)
+                            .foregroundColor(.black) // Couleur noire
                         FormField(label: "Description", text: $highlights)
+                            .foregroundColor(.black) // Couleur noire
 
                         // Afficher l'image actuelle
                         if let image = selectedImage ?? UIImage(data: post.mediaData ?? Data()) {
@@ -241,7 +274,6 @@ struct EditPostView: View {
 
                         Button(action: {
                             // Logique pour choisir une nouvelle image si nécessaire
-                            // Pour simplifier, nous allons ignorer cette partie ici.
                         }) {
                             Text("Changer Photo")
                                 .fontWeight(.bold)
@@ -393,14 +425,14 @@ struct CreatePostView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DarkBlueGradientBackground() // Appliquer le fond à l'intérieur de NavigationView
+                DarkBlueGradientBackground()
 
                 ScrollView {
                     VStack(spacing: 20) {
                         Text("Créer un nouveau match")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.white) // Texte en blanc pour le contraste
+                            .foregroundColor(.white)
                             .padding(.top)
 
                         FormField(label: "Adversaire", text: $opponent)
@@ -435,11 +467,10 @@ struct CreatePostView: View {
 
                         Text("Lieu du match:")
                             .font(.headline)
-                            .foregroundColor(.white) // Texte en blanc
+                            .foregroundColor(.white)
 
-                        // Carte avec sélection de lieu
                         Map(coordinateRegion: $region, interactionModes: [.all], showsUserLocation: true, annotationItems: [AnnotatedLocation(coordinate: selectedCoordinate.coordinate)]) { location in
-                            MapMarker(coordinate: location.coordinate, tint: .orange) // Marqueur orange
+                            MapMarker(coordinate: location.coordinate, tint: .orange)
                         }
                         .frame(height: 300)
                         .cornerRadius(10)
@@ -459,7 +490,7 @@ struct CreatePostView: View {
                         }
                         .padding(.horizontal)
                         .alert(isPresented: $showAlert) {
-                            Alert(title: Text("Erreur"), message: Text("Please fill in all the fields."), dismissButton: .default(Text("OK")))
+                            Alert(title: Text("Erreur"), message: Text("Veuillez remplir tous les champs."), dismissButton: .default(Text("OK")))
                         }
                     }
                     .padding()
@@ -479,8 +510,7 @@ struct CreatePostView: View {
             return
         }
 
-        // Convert the selected image to Data if available
-        let mediaData = selectedImage?.jpegData(compressionQuality: 0.8) // Adjust compression quality as needed
+        let mediaData = selectedImage?.jpegData(compressionQuality: 0.8)
 
         let newPost = FootballPost(
             date: Date(),
@@ -490,7 +520,7 @@ struct CreatePostView: View {
             assists: assistsInt,
             highlights: highlights,
             locationCoordinate: selectedCoordinate.coordinate,
-            mediaData: mediaData // Pass the media data (image) here
+            mediaData: mediaData
         )
 
         postStorage.addPost(newPost)
@@ -501,7 +531,7 @@ struct CreatePostView: View {
         goals = ""
         assists = ""
         highlights = ""
-        selectedImage = nil // Reset the selected image
+        selectedImage = nil
     }
 }
 
@@ -595,7 +625,7 @@ struct FormField: View {
                 .foregroundColor(.white) // Texte en blanc
             TextField("", text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(.white) // Couleur du texte dans le champ
+                .foregroundColor(.black) // Couleur du texte dans le champ
                 .background(Color.gray.opacity(0.2)) // Fond du champ de texte légèrement gris clair
                 .padding(.horizontal)
         }
