@@ -67,7 +67,8 @@ struct ContentView: View {
         TabView {
             MatchView()
                 .tabItem {
-                    Label("Matchs", systemImage: "house.fill")
+                    Image(systemName: "soccerball")
+                    Text("Matchs")
                 }
         }
         .accentColor(Color.orange) // Accentuation en orange pour les éléments interactifs
@@ -111,7 +112,7 @@ class PostStorage: ObservableObject {
     }
 }
 
-// Vue pour le fil d'actualité (Feed)
+// Vue match
 struct MatchView: View {
     @ObservedObject var postStorage = PostStorage()
     @State private var isCreatePostPresented = false // État pour contrôler la présentation de CreatePostView
@@ -119,7 +120,8 @@ struct MatchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DarkBlueGradientBackground() // Appliquer le fond à l'intérieur de NavigationView
+                DarkBlueGradientBackground()
+                    .edgesIgnoringSafeArea(.all) // S'assurer que le fond couvre tout l'écran
 
                 List {
                     ForEach(postStorage.posts) { post in
@@ -129,30 +131,35 @@ struct MatchView: View {
                                     Text(post.opponent)
                                         .font(.headline)
                                         .fontWeight(.bold)
+                                        .foregroundColor(.white)
                                     Spacer()
                                     Text(post.score)
                                         .font(.subheadline)
-                                        .foregroundColor(.gray) // Texte gris
+                                        .foregroundColor(.white) // Texte gris
                                 }
                                 Text("Date: \(post.date, formatter: dateFormatter)")
                                     .font(.caption)
+                                    .foregroundColor(.white)
+                                
                             }
                             .padding()
-                            .background(Color.gray.opacity(0.2)) // Fond gris clair pour les cellules
-                            .cornerRadius(10) // Coins arrondis pour un style moderne
+                            .background(Color.clear) // S'assurer que le fond de chaque cellule est transparent
+                            .cornerRadius(10)
                         }
+                        // Appliquer un fond transparent à chaque cellule de la liste
+                        .listRowBackground(Color.clear)
                     }
                     .onDelete(perform: postStorage.removePost) // Permet de supprimer un post
                 }
-                .listStyle(PlainListStyle()) // Empêche l'utilisation du fond blanc par défaut des sections
-                .background(Color.clear) // S'assure que la liste soit transparente
-                .navigationTitle("Matchs") // Nouveau titre pour le Feed
+                .background(Color.clear) // S'assurer que le fond de la liste est transparent
+                .listStyle(PlainListStyle()) // Style sans sections
+                .navigationTitle("Matchs") // Titre
                 .toolbar {
-                    EditButton() // Bouton d'édition pour supprimer les posts
+                    EditButton() // Bouton d'édition
                 }
             }
             .overlay(
-                // Ajouter un bouton en bas à droite pour créer un nouveau post
+                // Bouton pour ajouter un nouveau post
                 Button(action: {
                     isCreatePostPresented.toggle() // Afficher CreatePostView
                 }) {
@@ -164,17 +171,138 @@ struct MatchView: View {
                         .clipShape(Circle())
                         .shadow(radius: 10)
                 }
-                .padding(.bottom, 30) // Espacement du bas
-                .padding(.trailing, 20), // Espacement à droite
-                alignment: .bottomTrailing // Positionner le bouton en bas à droite
+                .padding(.bottom, 30)
+                .padding(.trailing, 20),
+                alignment: .bottomTrailing
             )
         }
         .sheet(isPresented: $isCreatePostPresented) {
             CreatePostView() // Présenter CreatePostView dans une feuille
         }
-        .edgesIgnoringSafeArea(.all) // Ignore les bords pour que le fond dégradé prenne toute la vue
+        .edgesIgnoringSafeArea(.all) // Ignore les bords pour que le fond prenne toute la vue
     }
 }
+
+
+// Vue pour éditer un post existant
+struct EditPostView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var postStorage: PostStorage
+    var post: FootballPost
+    
+    @State private var opponent: String
+    @State private var score: String
+    @State private var goals: String
+    @State private var assists: String
+    @State private var highlights: String
+    @State private var selectedImage: UIImage? = nil
+    @State private var showAlert = false
+
+    init(postStorage: PostStorage, post: FootballPost) {
+        self.postStorage = postStorage
+        self.post = post
+        
+        // Initialiser les champs avec les valeurs du post existant
+        _opponent = State(initialValue: post.opponent)
+        _score = State(initialValue: post.score)
+        _goals = State(initialValue: String(post.goals))
+        _assists = State(initialValue: String(post.assists))
+        _highlights = State(initialValue: post.highlights)
+    }
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                DarkBlueGradientBackground()
+
+                ScrollView {
+                    VStack(spacing: 20) {
+                        Text("Modifier le post")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.top)
+
+                        FormField(label: "Adversaire", text: $opponent)
+                        FormField(label: "Score", text: $score)
+                        FormField(label: "Buts", text: $goals)
+                        FormField(label: "Passes dé", text: $assists)
+                        FormField(label: "Description", text: $highlights)
+
+                        // Afficher l'image actuelle
+                        if let image = selectedImage ?? UIImage(data: post.mediaData ?? Data()) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .padding(.top)
+                        }
+
+                        Button(action: {
+                            // Logique pour choisir une nouvelle image si nécessaire
+                            // Pour simplifier, nous allons ignorer cette partie ici.
+                        }) {
+                            Text("Changer Photo")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.orange)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+
+                        Button(action: savePost) {
+                            Text("Enregistrer les modifications")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.orange)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                        .alert(isPresented: $showAlert) {
+                            Alert(title: Text("Erreur"), message: Text("Veuillez remplir tous les champs."), dismissButton: .default(Text("OK")))
+                        }
+                    }
+                    .padding()
+                    .navigationBarTitle("Édition de Post", displayMode: .inline)
+                }
+            }
+        }
+    }
+
+    func savePost() {
+        guard !opponent.isEmpty, !score.isEmpty, let goalsInt = Int(goals), let assistsInt = Int(assists), !highlights.isEmpty else {
+            showAlert = true
+            return
+        }
+
+        // Convertir l'image sélectionnée (ou celle du post existant) en Data
+        let mediaData = selectedImage?.jpegData(compressionQuality: 0.8) ?? post.mediaData
+
+        let updatedPost = FootballPost(
+            date: post.date,
+            opponent: opponent,
+            score: score,
+            goals: goalsInt,
+            assists: assistsInt,
+            highlights: highlights,
+            locationCoordinate: post.locationCoordinate,
+            mediaData: mediaData
+        )
+
+        if let index = postStorage.posts.firstIndex(where: { $0.id == post.id }) {
+            postStorage.posts[index] = updatedPost
+            postStorage.savePosts()
+        }
+
+        presentationMode.wrappedValue.dismiss()
+    }
+}
+
 
 
 // Vue détaillée d'un Post
