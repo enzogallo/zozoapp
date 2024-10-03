@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+import CoreLocation
 
 struct MatchRowView: View {
     var post: FootballPost

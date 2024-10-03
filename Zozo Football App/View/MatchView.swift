@@ -23,7 +23,7 @@ struct MatchView: View {
 
                 List {
                     ForEach(postStorage.posts) { post in
-                        NavigationLink(destination: PostDetailView(post: post)) {
+                        NavigationLink(destination: MatchDetailView(post: post)) {
                             MatchRowView(post: post)
                         }
                         .contextMenu {

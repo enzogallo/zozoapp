@@ -56,7 +56,7 @@ struct ProfileView: View {
 
                 // Liste des posts
                 List(postStorage.posts) { post in
-                    NavigationLink(destination: PostDetailView(post: post)) {
+                    NavigationLink(destination: MatchDetailView(post: post)) {
                         VStack(alignment: .leading) {
                             Text("\(post.opponent) - \(post.score)")
                                 .font(.headline)

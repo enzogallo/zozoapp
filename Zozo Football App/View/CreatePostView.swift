@@ -9,7 +9,6 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
-
 // Vue pour créer un nouveau post
 struct CreatePostView: View {
     @State private var opponent = ""
@@ -17,6 +16,8 @@ struct CreatePostView: View {
     @State private var goals = ""
     @State private var assists = ""
     @State private var highlights = ""
+    @State private var matchDate = Date()
+    
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 48.8566, longitude: 2.3522),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -39,7 +40,7 @@ struct CreatePostView: View {
                         Text("Créer un nouveau match")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .padding(.top)
 
                         FormField(label: "Adversaire", text: $opponent)
@@ -48,6 +49,23 @@ struct CreatePostView: View {
                         FormField(label: "Passes dé", text: $assists)
 
                         FormField(label: "Description", text: $highlights)
+
+                        // Ajout d'un sélecteur de date
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Date du match")
+                                .font(.headline)
+                                .foregroundColor(.white) // Texte en blanc
+                            
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.black)
+                                DatePicker("Date du match", selection: $matchDate, displayedComponents: .date)
+                                    .datePickerStyle(GraphicalDatePickerStyle())
+                                    .padding()
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal)
+                        }
 
                         // Image picker section
                         if let image = selectedImage {
@@ -120,7 +138,7 @@ struct CreatePostView: View {
         let mediaData = selectedImage?.jpegData(compressionQuality: 0.8)
 
         let newPost = FootballPost(
-            date: Date(),
+            date: matchDate,  // Utilisation de la date sélectionnée
             opponent: opponent,
             score: score,
             goals: goalsInt,
@@ -139,6 +157,7 @@ struct CreatePostView: View {
         assists = ""
         highlights = ""
         selectedImage = nil
+        matchDate = Date()  // Réinitialiser la date à la date actuelle
     }
 }
 
