@@ -13,7 +13,7 @@ struct PostDetailView: View {
     
     var body: some View {
         ZStack {
-            DarkBlueGradientBackground()
+            DarkGreenGradientBackground()
             ScrollView { // Un seul ScrollView
                 VStack(alignment: .leading, spacing: 15) {
                     Spacer()

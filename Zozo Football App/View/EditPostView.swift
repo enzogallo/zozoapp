@@ -41,7 +41,7 @@ struct EditPostView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DarkBlueGradientBackground()
+                DarkGreenGradientBackground()
 
                 ScrollView {
                     VStack(spacing: 20) {

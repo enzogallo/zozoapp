@@ -27,7 +27,7 @@ struct ProfileView: View {
     var body: some View {
         ZStack {
             // Appliquer le fond dégradé
-            DarkBlueGradientBackground()
+            DarkGreenGradientBackground()
             
             VStack(alignment: .leading) {
                 Image(systemName: "person.crop.circle.fill")

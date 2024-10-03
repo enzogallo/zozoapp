@@ -18,7 +18,7 @@ struct MatchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DarkBlueGradientBackground()
+                DarkGreenGradientBackground()
                     .edgesIgnoringSafeArea(.all)
 
                 List {

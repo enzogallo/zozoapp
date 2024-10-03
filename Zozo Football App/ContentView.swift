@@ -19,7 +19,7 @@ struct ContentView: View {
                 }
         }
         .accentColor(Color.orange) // Accentuation en orange pour les éléments interactifs
-        .background(DarkBlueGradientBackground()) // Appliquer le fond avec dégradé bleu
+        .background(DarkGreenGradientBackground()) // Appliquer le fond avec dégradé bleu
     }
 }
 

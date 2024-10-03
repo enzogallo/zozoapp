@@ -32,7 +32,7 @@ struct CreatePostView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DarkBlueGradientBackground()
+                DarkGreenGradientBackground()
 
                 ScrollView {
                     VStack(spacing: 20) {

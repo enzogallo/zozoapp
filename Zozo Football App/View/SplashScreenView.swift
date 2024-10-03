@@ -12,21 +12,22 @@ struct SplashScreenView: View {
     @State private var scale = 0.7
     @Binding var isActive: Bool
     var body: some View {
-        VStack {
+        ZStack {
+            DarkGreenGradientBackground()
+            
             VStack {
-                Image(systemName: "soccerball")
+                Image("splash_app_icon")
                     .font(.system(size: 100))
                     .foregroundColor(.blue)
-                Text("Zozo App")
-                    .font(.system(size: 40))
-                    .foregroundStyle(.blue)
-            }.scaleEffect(scale)
-            .onAppear{
+            }
+            .scaleEffect(scale)
+            .onAppear {
                 withAnimation(.easeIn(duration: 0.7)) {
                     self.scale = 0.9
                 }
             }
-        }.onAppear {
+        }
+        .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation {
                     self.isActive = true
