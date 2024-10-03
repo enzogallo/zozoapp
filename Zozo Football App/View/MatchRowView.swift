@@ -18,8 +18,8 @@ struct MatchRowView: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: 50, height: 50)
-                    .clipShape(Circle()) // Pour arrondir l'image
-                    .overlay(Circle().stroke(Color.white, lineWidth: 2)) // Optionnel : ajout d'une bordure
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
                     .shadow(radius: 5)
             }
 
@@ -29,19 +29,36 @@ struct MatchRowView: View {
                         .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
+                    
                     Spacer()
+                    
                     Text(post.score)
                         .font(.subheadline)
                         .foregroundColor(.white)
+                        .padding(.leading, 5) // Add some space
                 }
-                Text("Date: \(post.date, formatter: dateFormatter)")
-                    .font(.caption)
-                    .foregroundColor(.white)
+                
+                HStack {
+                    Image(systemName: "calendar")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 14, height: 14)
+                        .foregroundColor(.white)
+                    
+                    Text(post.date, formatter: dateFormatter)
+                        .font(.caption)
+                        .foregroundColor(.gray) // Lighter color for the date
+                }
             }
+            .padding(.vertical, 10) // Add vertical padding for better touch area
         }
         .padding()
-        .background(Color.clear)
+        //.background(post.win ? Color.green.opacity(0.3) : Color.red.opacity(0.3)) // Conditional background color
         .cornerRadius(10)
-        .listRowBackground(Color.clear) // Rendre le fond de la cellule transparent
+        .shadow(radius: 5) // Shadow for depth
+        .padding(.horizontal) // Padding on horizontal edges
+        .listRowBackground(Color.clear) // Make the background of the row transparent
+        .contentShape(Rectangle()) // Makes the entire row tappable
+        // Here you can add a tap action to navigate to the detail view if needed
     }
 }

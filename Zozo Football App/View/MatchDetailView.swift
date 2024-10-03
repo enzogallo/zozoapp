@@ -1,5 +1,5 @@
 //
-//  PostDetailView.swift
+//  MatchDetailView.swift
 //  ZozoApp
 //
 //  Created by Enzo Perso on 03/10/2024.
@@ -39,12 +39,15 @@ struct MatchDetailView: View {
                     
                     // Affichage de l'image si disponible
                     if let mediaData = post.mediaData, let image = UIImage(data: mediaData) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 200)
-                            .cornerRadius(10)
-                            .padding(.bottom)
+                        // Use NavigationLink to present the full-screen image
+                        NavigationLink(destination: FullScreenImageView(image: image)) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .padding(.bottom)
+                        }
                     } else {
                         Text("No media available")
                             .foregroundColor(.gray)
@@ -154,6 +157,21 @@ struct MatchDetailView: View {
                     self.weatherError = error.localizedDescription
                 }
             }
+        }
+    }
+}
+
+struct FullScreenImageView: View {
+    let image: UIImage
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .aspectRatio(contentMode: .fit)
+                .padding()
         }
     }
 }
