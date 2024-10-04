@@ -40,7 +40,7 @@ struct CreatePostView: View {
                         Text("Créer un nouveau match")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding(.top)
 
                         FormField(label: "Adversaire", text: $opponent)
@@ -58,7 +58,7 @@ struct CreatePostView: View {
                             
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.black)
+                                    .fill(Color.white)
                                 DatePicker("Date du match", selection: $matchDate, displayedComponents: .date)
                                     .datePickerStyle(GraphicalDatePickerStyle())
                                     .padding()

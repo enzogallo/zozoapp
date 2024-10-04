@@ -47,12 +47,11 @@ struct MatchRowView: View {
                     
                     Text(post.date, formatter: dateFormatter)
                         .font(.caption)
-                        .foregroundColor(.gray) // Lighter color for the date
+                        .foregroundColor(.white) // Lighter color for the date
                 }
             }
             .padding(.vertical, 10) // Add vertical padding for better touch area
         }
-        .padding()
         //.background(post.win ? Color.green.opacity(0.3) : Color.red.opacity(0.3)) // Conditional background color
         .cornerRadius(10)
         .shadow(radius: 5) // Shadow for depth

@@ -62,7 +62,7 @@ struct EditPostView: View {
                             // Ajout d'un DatePicker pour modifier la date
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.black)
+                                    .fill(Color.white)
                                                         
                                 DatePicker("Date du match", selection: $selectedDate, displayedComponents: .date)
                                     .datePickerStyle(GraphicalDatePickerStyle())
