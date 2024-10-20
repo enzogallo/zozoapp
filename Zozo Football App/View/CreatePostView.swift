@@ -40,7 +40,7 @@ struct CreatePostView: View {
                         Text("Créer un nouveau match")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .padding(.top)
 
                         FormField(label: "Adversaire", text: $opponent)
@@ -164,4 +164,11 @@ struct CreatePostView: View {
 struct AnnotatedLocation: Identifiable {
     var id = UUID()
     var coordinate: CLLocationCoordinate2D
+}
+
+// Preview
+struct CreatePostView_Previews: PreviewProvider {
+    static var previews: some View {
+        CreatePostView()
+    }
 }

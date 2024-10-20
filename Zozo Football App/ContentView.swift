@@ -16,6 +16,12 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "soccerball")
                     Text("Matchs")
+            }
+            
+            FormationView()
+                .tabItem {
+                    Image(systemName: "figure.walk")
+                    Text("Formation")
                 }
         }
         .accentColor(Color.orange) // Accentuation en orange pour les éléments interactifs

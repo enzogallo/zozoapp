@@ -19,8 +19,7 @@ struct FormField: View {
                 .foregroundColor(.white) // Texte en blanc
             TextField("", text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .foregroundColor(.black) // Couleur du texte dans le champ
-                .background(Color.gray.opacity(0.2)) // Fond du champ de texte légèrement gris clair
+                .foregroundColor(.white) // Couleur du texte dans le champ
                 .padding(.horizontal)
         }
     }

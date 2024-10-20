@@ -12,6 +12,7 @@ struct ZozoAppApp: App {
     var body: some Scene {
         WindowGroup {
             ViewCoordinator()
+                .preferredColorScheme(.dark)
         }
     }
 }
