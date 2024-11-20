@@ -21,34 +21,47 @@ struct MatchView: View {
                 DarkGreenGradientBackground()
                     .edgesIgnoringSafeArea(.all)
 
-                List {
-                    ForEach(postStorage.posts) { post in
-                        NavigationLink(destination: MatchDetailView(post: post)) {
-                            MatchRowView(post: post)
+                if postStorage.posts.isEmpty {
+                    ZStack {
+                        
+                        VStack {
+                            // Text or message indicating no posts
+                            Text("Aucun match enregistré pour le moment...")
+                                .foregroundColor(.white)
+
+                            // Animation Lottie
+                            LottieView(animationName: "players_waiting")
+                                .frame(width: 350, height: 600)
                         }
-                        .contextMenu {
-                            Button(action: {
-                                selectedPost = post
-                                isEditPostPresented = true
-                            }) {
-                                HStack {
-                                    Image(systemName: "pencil")
-                                    Text("Modifier")
+                            
+                    }
+                } else {
+                    List {
+                        ForEach(postStorage.posts) { post in
+                            NavigationLink(destination: MatchDetailView(post: post)) {
+                                MatchRowView(post: post)
+                            }
+                            .contextMenu {
+                                Button(action: {
+                                    selectedPost = post
+                                    isEditPostPresented = true
+                                }) {
+                                    HStack {
+                                        Image(systemName: "pencil")
+                                        Text("Modifier")
+                                    }
                                 }
                             }
-                            .padding()
-                            .background(Color.clear) // S'assurer que le fond de chaque cellule est transparent
-                            .cornerRadius(10)
+                            .listRowBackground(Color.clear)
                         }
-                        // Appliquer un fond transparent à chaque cellule de la liste
-                        .listRowBackground(Color.clear)
+                        .onDelete(perform: postStorage.removePost)
                     }
-                    .onDelete(perform: postStorage.removePost)
+                    .background(Color.clear)
+                    .listStyle(PlainListStyle())
                 }
-                .background(Color.clear)
-                .listStyle(PlainListStyle())
-                .navigationTitle("Matchs")
-                .toolbar {
+            }
+            .toolbar {
+                if !postStorage.posts.isEmpty {
                     EditButton()
                 }
             }
@@ -76,5 +89,12 @@ struct MatchView: View {
             EditPostView(postStorage: postStorage, post: post)
         }
         .edgesIgnoringSafeArea(.all)
+    }
+}
+
+// Preview
+struct MatchView_Previews: PreviewProvider {
+    static var previews: some View {
+        MatchView()
     }
 }

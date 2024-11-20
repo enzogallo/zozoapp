@@ -11,21 +11,31 @@ import SwiftUI
 // Vue principale avec les onglets
 struct ContentView: View {
     var body: some View {
-        TabView {
-            MatchView()
-                .tabItem {
-                    Image(systemName: "soccerball")
-                    Text("Matchs")
+        NavigationStack {
+            TabView {
+                MatchView()
+                    .tabItem {
+                        Image(systemName: "soccerball")
+                        Text("Matchs")
+                    }
+                
+                FormationView()
+                    .tabItem {
+                        Image(systemName: "figure.walk")
+                        Text("Formation")
+                    }
             }
-            
-            FormationView()
-                .tabItem {
-                    Image(systemName: "figure.walk")
-                    Text("Formation")
+            .accentColor(Color.orange) // Accentuation en orange pour les éléments interactifs
+            .background(DarkGreenGradientBackground()) // Appliquer le fond avec dégradé
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Image("zozo")
+                        .resizable()
+                        .frame(width: 300, height: 300)
+                        .padding(.trailing, 40)
                 }
+            }
         }
-        .accentColor(Color.orange) // Accentuation en orange pour les éléments interactifs
-        .background(DarkGreenGradientBackground()) // Appliquer le fond avec dégradé bleu
     }
 }
 

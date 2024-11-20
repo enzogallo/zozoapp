@@ -18,8 +18,10 @@ struct FormField: View {
                 .font(.headline)
                 .foregroundColor(.white) // Texte en blanc
             TextField("", text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
                 .foregroundColor(.white) // Couleur du texte dans le champ
+                .background(Color.gray.opacity(0.5)) // Couleur de fond personnalisée
+                .cornerRadius(10) // Bordure arrondie
                 .padding(.horizontal)
         }
     }

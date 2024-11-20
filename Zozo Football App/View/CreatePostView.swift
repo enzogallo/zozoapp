@@ -58,7 +58,7 @@ struct CreatePostView: View {
                             
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
+                                    .fill(Color.gray.opacity(0.5))
                                 DatePicker("Date du match", selection: $matchDate, displayedComponents: .date)
                                     .datePickerStyle(GraphicalDatePickerStyle())
                                     .padding()
@@ -80,7 +80,7 @@ struct CreatePostView: View {
                         Button(action: {
                             isImagePickerPresented.toggle()
                         }) {
-                            Text("Photos")
+                            Text("Ajouter des photos")
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                                 .padding()
@@ -90,7 +90,7 @@ struct CreatePostView: View {
                         }
                         .padding(.horizontal)
 
-                        Text("Lieu du match:")
+                        /*Text("Lieu du match:")
                             .font(.headline)
                             .foregroundColor(.white)
 
@@ -102,10 +102,10 @@ struct CreatePostView: View {
                         .onTapGesture {
                             let newLocation = region.center
                             selectedCoordinate = EquatableCoordinate(coordinate: newLocation)
-                        }
+                        }*/
 
                         Button(action: savePost) {
-                            Text("Enregistrer")
+                            Text("Enregistrer le match")
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                                 .padding()

@@ -16,48 +16,59 @@ struct MatchDetailView: View {
         ZStack {
             DarkGreenGradientBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: 15) {
+                // Center content vertically and horizontally within VStack
+                VStack(alignment: .center, spacing: 15) {
                     Spacer()
+
                     Text("Adversaire: \(post.opponent)")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
-                    
+                        .multilineTextAlignment(.center) // Centering text
+
                     Text("Score: \(post.score)")
                         .font(.headline)
                         .foregroundColor(.white)
+                        .multilineTextAlignment(.center) // Centering text
                     
                     HStack {
-                        VStack(alignment: .leading) {
+                        // Centering the inner content
+                        VStack(alignment: .center) {
                             Text("Buts: \(post.goals)")
                             Text("Passes dé: \(post.assists)")
                         }
                         .foregroundColor(.white)
+
                         Spacer()
                     }
                     .font(.subheadline)
-                    
-                    // Affichage de l'image si disponible
+                    .multilineTextAlignment(.center)
+
+                    // Image Section: Centered in ScrollView
                     if let mediaData = post.mediaData, let image = UIImage(data: mediaData) {
-                        // Use NavigationLink to present the full-screen image
+                        // NavigationLink for image full screen
                         NavigationLink(destination: FullScreenImageView(image: image)) {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: 200)
+                                .frame(height: 300)
                                 .cornerRadius(10)
                                 .padding(.bottom)
                         }
-                    } else {
-                        Text("No media available")
-                            .foregroundColor(.gray)
                     }
                     
-                    Text("Description:")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text(post.highlights)
-                        .foregroundColor(.gray)
+                    if !post.highlights.isEmpty {
+                        Text("Description:")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center) // Centering text
+
+                        Text(post.highlights)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center) // Centering text
+                    }
+
+                    /*
                     
                     // Affichage des données de météo
                     if let weather = weatherResponse {
@@ -131,7 +142,9 @@ struct MatchDetailView: View {
                                 Spacer()
                             }, alignment: .top
                         )
+                     */
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensuring content takes full available space
                 .padding()
                 .padding(.top, 70)
             }
