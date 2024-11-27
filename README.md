@@ -1,6 +1,6 @@
 # Zozo App
 
-Welcome to the Zozo App, a personal iOS project I started in September 2024. This app is part of my journey to explore and enhance my skills in Swift/SwiftUI and go further in iOS development. With 3 years of experience as a developer, I am now taking on the challenge of building my own app with a simple but meaningful objective: helping me track my football match history and create formations for pre-match planning.
+Welcome to the Zozo App, a personal iOS project I started in October 2024. This app is part of my journey to explore and enhance my skills in Swift/SwiftUI and go further in iOS development. With 3 years of experience as a developer, I am now taking on the challenge of building my own app with a simple but meaningful objective: helping me track my football match history and create formations for pre-match planning.
 
 Beyond this initial goal, I also aim to integrate backend implementation into the app, allowing me to better understand how server-side functionalities work and gain insights that will enhance my role as a frontend developer.
 
